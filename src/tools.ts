@@ -9,11 +9,15 @@ export function calculateTrueCost({
   utilitiesEstimate,
   monthlyCommuteCost,
   miscExpenses,
+  currency = 'USD',
+  currencySymbol = '$',
 }: {
   monthlyRent: number;
   utilitiesEstimate: number;
   monthlyCommuteCost: number;
   miscExpenses: number;
+  currency?: string;
+  currencySymbol?: string;
 }) {
   const total = monthlyRent + utilitiesEstimate + monthlyCommuteCost + miscExpenses;
   const annual = total * 12;
@@ -25,6 +29,8 @@ export function calculateTrueCost({
     totalMonthly: total,
     totalAnnual: annual,
     rentPercentage: Math.round((monthlyRent / total) * 100),
+    currency,
+    currencySymbol,
   };
   return JSON.stringify(breakdown);
 }
@@ -219,23 +225,25 @@ export async function compareSavedProperties({
 
 // --- Tool definitions for Groq ---
 export const toolDefinitions = [
-  {
-    type: 'function' as const,
-    function: {
-      name: 'calculateTrueCost',
-      description: 'Calculate the true total monthly and annual cost of living somewhere including rent, utilities, commute and misc expenses.',
-      parameters: {
-        type: 'object',
-        properties: {
-          monthlyRent:        { type: 'number', description: 'Monthly rent in USD' },
-          utilitiesEstimate:  { type: 'number', description: 'Monthly utilities estimate in USD' },
-          monthlyCommuteCost: { type: 'number', description: 'Monthly commute cost in USD' },
-          miscExpenses:       { type: 'number', description: 'Other monthly expenses like parking or gym in USD' },
-        },
-        required: ['monthlyRent', 'utilitiesEstimate', 'monthlyCommuteCost', 'miscExpenses']
-      }
+{
+  type: 'function' as const,
+  function: {
+    name: 'calculateTrueCost',
+    description: 'Calculate the true total monthly and annual cost of living somewhere including rent, utilities, commute and misc expenses.',
+    parameters: {
+      type: 'object',
+      properties: {
+        monthlyRent:        { type: 'number', description: 'Monthly rent in local currency' },
+        utilitiesEstimate:  { type: 'number', description: 'Monthly utilities estimate in local currency' },
+        monthlyCommuteCost: { type: 'number', description: 'Monthly commute cost in local currency' },
+        miscExpenses:       { type: 'number', description: 'Other monthly expenses in local currency' },
+        currency:           { type: 'string', description: 'Currency code e.g. USD, INR, EUR, GBP, JPY' },
+        currencySymbol:     { type: 'string', description: 'Currency symbol e.g. $, ₹, €, £, ¥' },
+      },
+      required: ['monthlyRent', 'utilitiesEstimate', 'monthlyCommuteCost', 'miscExpenses', 'currency', 'currencySymbol']
     }
-  },
+  }
+},
   {
     type: 'function' as const,
     function: {

@@ -491,19 +491,20 @@
         }
 
         function buildCard(toolUsed, data) {
-            if (toolUsed === 'calculateTrueCost') {
+           if (toolUsed === 'calculateTrueCost') {
                 const card = document.createElement('div');
                 card.className = 'card';
+                const sym = data.currencySymbol || '$';
                 card.innerHTML = `
-        <h3>💰 True Monthly Cost Breakdown</h3>
-        <div class="cost-row"><span class="label">Rent</span><span>$${data.rent}</span></div>
-        <div class="cost-row"><span class="label">Utilities</span><span>$${data.utilities}</span></div>
-        <div class="cost-row"><span class="label">Commute</span><span>$${data.commute}</span></div>
-        <div class="cost-row"><span class="label">Misc</span><span>$${data.misc}</span></div>
-        <div class="cost-row total"><span>Total Monthly</span><span>$${data.totalMonthly}</span></div>
-        <div class="cost-row"><span class="label">Annual Total</span><span>$${data.totalAnnual.toLocaleString()}</span></div>
-        <div class="cost-row"><span class="label">Rent % of Total</span><span>${data.rentPercentage}%</span></div>
-      `;
+    <h3>💰 True Monthly Cost Breakdown</h3>
+    <div class="cost-row"><span class="label">Rent</span><span>${sym}${data.rent.toLocaleString()}</span></div>
+    <div class="cost-row"><span class="label">Utilities</span><span>${sym}${data.utilities.toLocaleString()}</span></div>
+    <div class="cost-row"><span class="label">Commute</span><span>${sym}${data.commute.toLocaleString()}</span></div>
+    <div class="cost-row"><span class="label">Misc</span><span>${sym}${data.misc.toLocaleString()}</span></div>
+    <div class="cost-row total"><span>Total Monthly</span><span>${sym}${data.totalMonthly.toLocaleString()}</span></div>
+    <div class="cost-row"><span class="label">Annual Total</span><span>${sym}${data.totalAnnual.toLocaleString()}</span></div>
+    <div class="cost-row"><span class="label">Rent % of Total</span><span>${data.rentPercentage}%</span></div>
+  `;
                 return card;
             }
 

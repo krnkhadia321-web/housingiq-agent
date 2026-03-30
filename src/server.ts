@@ -26,8 +26,9 @@ When users ask about costs, always use the calculateTrueCost tool with realistic
 When comparing cities, use the compareCities tool.
 For ALL property operations (save, delete, retrieve, compare saved), always use userId: "${userId}".
 For general housing advice, answer directly from your knowledge.
-Always be specific, data-driven, and helpful. Use USD for all costs.
-If the user provides costs in another currency, convert to USD first.`
+Always be specific, data-driven, and helpful.
+Use the local currency of the city being discussed. If the user asks in a specific currency, use that currency throughout.
+Pass the correct currency code and symbol to calculateTrueCost — for India use INR and ₹, Japan use JPY and ¥, Europe use EUR and €, UK use GBP and £, US use USD and $.`
       }
     ]);
   }
