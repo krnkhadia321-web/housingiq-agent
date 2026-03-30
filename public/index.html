@@ -590,13 +590,18 @@
                 if (!data.results || data.results.length === 0) return null;
                 const card = document.createElement('div');
                 card.className = 'card';
-                let html = `<h3>🔍 Sources</h3>`;
+                let html = `<h3>🔍 Live Rental Data</h3>`;
+
+                // Try to extract property-like results
                 for (const r of data.results.slice(0, 3)) {
                     html += `
-          <div class="search-result">
-            <a href="${r.url}" target="_blank">${r.title}</a>
-            <p>${r.content}</p>
-          </div>`;
+      <div class="property-item">
+        <div style="flex:1">
+          <div class="property-name">${r.title}</div>
+          <div class="property-meta" style="margin-top:4px;line-height:1.5">${r.content}</div>
+          <a href="${r.url}" target="_blank" style="color:#2f6ef5;font-size:11px;margin-top:4px;display:inline-block">View source ↗</a>
+        </div>
+      </div>`;
                 }
                 card.innerHTML = html;
                 return card;

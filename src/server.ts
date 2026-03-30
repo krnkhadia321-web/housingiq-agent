@@ -65,11 +65,13 @@ app.post('/chat', async (req, res) => {
         messages: history,
       });
 
-      const finalText = finalResponse.choices[0].message.content!;
+      let finalText = finalResponse.choices[0].message.content!;
+      finalText = finalText.replace(/<function=\w+>.*?<\/function>/gs, '').trim();
       history.push({ role: 'assistant', content: finalText });
       res.json({ reply: finalText, toolUsed: toolCall.function.name, toolData: JSON.parse(toolResult) });
     } else {
-      const text = agentMessage.content!;
+      let text = agentMessage.content!;
+      text = text.replace(/<function=\w+>.*?<\/function>/gs, '').trim();
       history.push({ role: 'assistant', content: text });
       res.json({ reply: text, toolUsed: null, toolData: null });
     }
