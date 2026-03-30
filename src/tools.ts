@@ -155,6 +155,68 @@ export async function getSavedProperties({ userId }: { userId: string; confirm: 
   }
 }
 
+// --- Tool 7: Delete a saved property ---
+export async function deleteProperty({
+  neighborhood,
+  city,
+  userId,
+}: {
+  neighborhood: string;
+  city: string;
+  userId: string;
+}): Promise<string> {
+  try {
+    const { getDB } = await import('./db.js');
+    const db = getDB();
+    const result = await db.collection('properties').deleteOne({ neighborhood, city, userId });
+    if (result.deletedCount === 0) {
+      return JSON.stringify({ success: false, message: `No property found in ${neighborhood}, ${city}.` });
+    }
+    return JSON.stringify({ success: true, message: `Property in ${neighborhood}, ${city} deleted successfully.` });
+  } catch (err: any) {
+    return JSON.stringify({ success: false, error: err.message });
+  }
+}
+
+// --- Tool 8: Compare two saved properties ---
+export async function compareSavedProperties({
+  neighborhood1,
+  city1,
+  neighborhood2,
+  city2,
+  userId,
+}: {
+  neighborhood1: string;
+  city1: string;
+  neighborhood2: string;
+  city2: string;
+  userId: string;
+}): Promise<string> {
+  try {
+    const { getDB } = await import('./db.js');
+    const db = getDB();
+    const p1 = await db.collection('properties').findOne({ neighborhood: neighborhood1, city: city1, userId });
+    const p2 = await db.collection('properties').findOne({ neighborhood: neighborhood2, city: city2, userId });
+    if (!p1 || !p2) {
+      return JSON.stringify({ success: false, message: 'One or both properties not found in saved list.' });
+    }
+    const cheaper = p1.monthlyRent < p2.monthlyRent
+      ? `${p1.neighborhood}, ${p1.city}`
+      : `${p2.neighborhood}, ${p2.city}`;
+    const difference = Math.abs(p1.monthlyRent - p2.monthlyRent);
+    return JSON.stringify({
+      success: true,
+      property1: p1,
+      property2: p2,
+      cheaper,
+      monthlySaving: difference,
+      annualSaving: difference * 12,
+    });
+  } catch (err: any) {
+    return JSON.stringify({ success: false, error: err.message });
+  }
+}
+
 // --- Tool definitions for Groq ---
 export const toolDefinitions = [
   {
@@ -257,7 +319,41 @@ export const toolDefinitions = [
         required: ['userId', 'confirm']
       }
     }
-  }
+  },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'deleteProperty',
+      description: 'Delete a saved property from the user list by neighborhood and city.',
+      parameters: {
+        type: 'object',
+        properties: {
+          neighborhood: { type: 'string', description: 'Neighborhood name' },
+          city:         { type: 'string', description: 'City name' },
+          userId:       { type: 'string', description: 'User identifier, use "default" if not provided' },
+        },
+        required: ['neighborhood', 'city', 'userId']
+      }
+    }
+  },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'compareSavedProperties',
+      description: 'Compare two properties the user has already saved.',
+      parameters: {
+        type: 'object',
+        properties: {
+          neighborhood1: { type: 'string', description: 'Neighborhood of first property' },
+          city1:         { type: 'string', description: 'City of first property' },
+          neighborhood2: { type: 'string', description: 'Neighborhood of second property' },
+          city2:         { type: 'string', description: 'City of second property' },
+          userId:        { type: 'string', description: 'User identifier, use "default" if not provided' },
+        },
+        required: ['neighborhood1', 'city1', 'neighborhood2', 'city2', 'userId']
+      }
+    }
+  },
 ];
 
 // --- Tool runner ---
@@ -268,5 +364,7 @@ export async function runTool(name: string, args: Record<string, any>): Promise<
   if (name === 'searchRentalData') return await searchRentalData(args as any);
   if (name === 'saveProperty') return await saveProperty(args as any);
   if (name === 'getSavedProperties') return await getSavedProperties(args as any);
+  if (name === 'deleteProperty') return await deleteProperty(args as any);
+  if (name === 'compareSavedProperties') return await compareSavedProperties(args as any);
   return 'Unknown tool';
 }
