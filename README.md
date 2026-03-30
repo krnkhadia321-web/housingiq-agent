@@ -119,9 +119,9 @@ housingiq-agent/
 
 ## 📸 Screenshots
 
-| Cost Breakdown                  | City Comparison           | Saved Properties          |
-| ------------------------------- | ------------------------- | ------------------------- |
-| Itemized monthly + annual costs | Side-by-side with savings | Personal list with delete |
+![Login Screen](screenshots/login.png)
+![Cost Breakdown](screenshots/cost-breakdown.png)
+![City Comparison](screenshots/city-comparison.png)
 
 ---
 
