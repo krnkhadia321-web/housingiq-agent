@@ -21,13 +21,72 @@
             height: 100vh;
         }
 
+        /* --- Login Screen --- */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 24px;
+        }
+
+        #login-screen h1 {
+            font-size: 32px;
+            color: #fff;
+        }
+
+        #login-screen p {
+            color: #888;
+            font-size: 15px;
+        }
+
+        #login-screen input {
+            background: #1e2130;
+            border: 1px solid #2a2d3a;
+            border-radius: 8px;
+            padding: 14px 20px;
+            color: #fff;
+            font-size: 16px;
+            width: 320px;
+            outline: none;
+            text-align: center;
+        }
+
+        #login-screen input:focus {
+            border-color: #2f6ef5;
+        }
+
+        #login-screen button {
+            background: #2f6ef5;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 40px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 320px;
+        }
+
+        #login-screen button:hover {
+            background: #1a5ce0;
+        }
+
+        /* --- Main App --- */
+        #app {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+        }
+
         header {
             padding: 16px 24px;
             background: #1a1d27;
             border-bottom: 1px solid #2a2d3a;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
         }
 
         header h1 {
@@ -39,6 +98,33 @@
         header span {
             font-size: 13px;
             color: #888;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .user-badge strong {
+            color: #fff;
+        }
+
+        .logout-btn {
+            background: #1e2130;
+            border: 1px solid #2a2d3a;
+            color: #888;
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            color: #fff;
+            border-color: #555;
         }
 
         #chat {
@@ -245,6 +331,15 @@
             margin-top: 3px;
         }
 
+        .success-banner {
+            background: #1a3a1a;
+            border: 1px solid #2d5a2d;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #4caf50;
+            font-size: 13px;
+        }
+
         #input-area {
             padding: 16px 24px;
             background: #1a1d27;
@@ -298,26 +393,85 @@
 
 <body>
 
-    <header>
-        <div>
-            <h1>🏠 HousingIQ</h1>
-            <span>AI-powered housing research for any city</span>
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div style="font-size: 40px">🏠</div>
+        <h1>HousingIQ</h1>
+        <p>AI-powered housing research for any city</p>
+        <input id="username-input" type="text" placeholder="Enter your name to get started" maxlength="30" />
+        <button id="login-btn">Get Started</button>
+    </div>
+
+    <!-- Main App -->
+    <div id="app">
+        <header>
+            <div>
+                <h1>🏠 HousingIQ</h1>
+                <span>AI-powered housing research for any city</span>
+            </div>
+            <div class="user-badge">
+                <span>Logged in as <strong id="display-name"></strong></span>
+                <button class="logout-btn" id="logout-btn">Log out</button>
+            </div>
+        </header>
+
+        <div id="chat"></div>
+
+        <div id="input-area">
+            <input id="msg" type="text" placeholder="Ask about rent, compare cities, search listings..." />
+            <button id="send">Send</button>
         </div>
-    </header>
-
-    <div id="chat"></div>
-
-    <div id="input-area">
-        <input id="msg" type="text" placeholder="Ask about rent, compare cities, search listings..." />
-        <button id="send">Send</button>
     </div>
 
     <script>
+        let currentUser = null;
+        let sessionId = null;
+
+        const loginScreen = document.getElementById('login-screen');
+        const app = document.getElementById('app');
+        const usernameInput = document.getElementById('username-input');
+        const loginBtn = document.getElementById('login-btn');
+        const displayName = document.getElementById('display-name');
+        const logoutBtn = document.getElementById('logout-btn');
         const chat = document.getElementById('chat');
         const input = document.getElementById('msg');
         const sendBtn = document.getElementById('send');
-        const sessionId = 'session-' + Date.now();
 
+        // --- Login ---
+        function login() {
+            const name = usernameInput.value.trim();
+            if (!name) return;
+            currentUser = name.toLowerCase().replace(/\s+/g, '-');
+            sessionId = 'session-' + currentUser + '-' + Date.now();
+            displayName.textContent = name;
+            loginScreen.style.display = 'none';
+            app.style.display = 'flex';
+            localStorage.setItem('housingiq-user', name);
+            addMessage('agent', `Welcome back, ${name}! Ask me to calculate living costs, compare cities, search rental prices, or manage your saved properties.`, null, null);
+            input.focus();
+        }
+
+        loginBtn.addEventListener('click', login);
+        usernameInput.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+        // Auto-login if returning user
+        const savedUser = localStorage.getItem('housingiq-user');
+        if (savedUser) {
+            usernameInput.value = savedUser;
+        }
+
+        // --- Logout ---
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('housingiq-user');
+            currentUser = null;
+            sessionId = null;
+            chat.innerHTML = '';
+            usernameInput.value = '';
+            app.style.display = 'none';
+            loginScreen.style.display = 'flex';
+        });
+
+        // --- Chat ---
         function addMessage(role, text, toolUsed, toolData) {
             const wrapper = document.createElement('div');
             wrapper.className = `message ${role}`;
@@ -353,26 +507,23 @@
                 return card;
             }
 
-            if (toolUsed === 'compareCities') {
+            if (toolUsed === 'compareCities' || toolUsed === 'compareSavedProperties') {
                 const card = document.createElement('div');
                 card.className = 'card';
-                const c1 = data.city1, c2 = data.city2;
+                const c1 = data.city1 || { name: `${data.property1?.neighborhood}, ${data.property1?.city}`, rent: data.property1?.monthlyRent, utilities: 0, commute: 0, total: data.property1?.monthlyRent };
+                const c2 = data.city2 || { name: `${data.property2?.neighborhood}, ${data.property2?.city}`, rent: data.property2?.monthlyRent, utilities: 0, commute: 0, total: data.property2?.monthlyRent };
                 card.innerHTML = `
-        <h3>🏙️ City Comparison</h3>
+        <h3>🏙️ Comparison</h3>
         <div class="compare-grid">
           <div class="compare-city">
             <h4>${c1.name}</h4>
             <div class="cost-row"><span class="label">Rent</span><span>$${c1.rent}</span></div>
-            <div class="cost-row"><span class="label">Utilities</span><span>$${c1.utilities}</span></div>
-            <div class="cost-row"><span class="label">Commute</span><span>$${c1.commute}</span></div>
             <div class="city-total">$${c1.total}/mo</div>
             ${data.cheaper === c1.name ? '<span class="cheaper-badge">✓ Cheaper</span>' : ''}
           </div>
           <div class="compare-city">
             <h4>${c2.name}</h4>
             <div class="cost-row"><span class="label">Rent</span><span>$${c2.rent}</span></div>
-            <div class="cost-row"><span class="label">Utilities</span><span>$${c2.utilities}</span></div>
-            <div class="cost-row"><span class="label">Commute</span><span>$${c2.commute}</span></div>
             <div class="city-total">$${c2.total}/mo</div>
             ${data.cheaper === c2.name ? '<span class="cheaper-badge">✓ Cheaper</span>' : ''}
           </div>
@@ -418,6 +569,23 @@
                 return card;
             }
 
+            if (toolUsed === 'saveProperty' && data.success) {
+                const card = document.createElement('div');
+                card.className = 'success-banner';
+                card.textContent = `✓ Saved: ${data.property.neighborhood}, ${data.property.city} — $${data.property.monthlyRent}/mo`;
+                return card;
+            }
+
+            if (toolUsed === 'deleteProperty') {
+                const card = document.createElement('div');
+                card.className = 'success-banner';
+                card.style.background = data.success ? '#1a3a1a' : '#3a1a1a';
+                card.style.borderColor = data.success ? '#2d5a2d' : '#5a2d2d';
+                card.style.color = data.success ? '#4caf50' : '#f44336';
+                card.textContent = data.success ? `✓ ${data.message}` : `✗ ${data.message}`;
+                return card;
+            }
+
             if (toolUsed === 'searchRentalData') {
                 if (!data.results || data.results.length === 0) return null;
                 const card = document.createElement('div');
@@ -455,7 +623,7 @@
                 const res = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text, sessionId })
+                    body: JSON.stringify({ message: text, sessionId, userId: currentUser })
                 });
                 const data = await res.json();
                 typing.remove();
@@ -471,9 +639,6 @@
 
         sendBtn.addEventListener('click', sendMessage);
         input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
-
-        // Welcome message
-        addMessage('agent', 'Hi! I\'m HousingIQ — your AI housing research assistant. Ask me to calculate true living costs, compare cities, search rental prices, or save properties you\'re interested in.', null, null);
     </script>
 </body>
 

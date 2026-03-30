@@ -15,15 +15,16 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const sessions = new Map<string, Groq.Chat.ChatCompletionMessageParam[]>();
 
-function getOrCreateSession(sessionId: string): Groq.Chat.ChatCompletionMessageParam[] {
+function getOrCreateSession(sessionId: string, userId: string): Groq.Chat.ChatCompletionMessageParam[] {
   if (!sessions.has(sessionId)) {
     sessions.set(sessionId, [
       {
         role: 'system',
         content: `You are HousingIQ, an expert AI assistant that helps people make smart housing decisions globally.
-You have access to tools for calculating true housing costs, comparing cities, and generating moving checklists.
+You have access to tools for calculating true housing costs, comparing cities, generating moving checklists, saving properties, deleting properties, and comparing saved properties.
 When users ask about costs, always use the calculateTrueCost tool with realistic estimates if they don't provide exact numbers.
 When comparing cities, use the compareCities tool.
+For ALL property operations (save, delete, retrieve, compare saved), always use userId: "${userId}".
 For general housing advice, answer directly from your knowledge.
 Always be specific, data-driven, and helpful. Use USD for all costs.
 If the user provides costs in another currency, convert to USD first.`
@@ -34,11 +35,11 @@ If the user provides costs in another currency, convert to USD first.`
 }
 
 app.post('/chat', async (req, res) => {
-  const { message, sessionId = 'default' } = req.body;
+  const { message, sessionId = 'default', userId = 'default' } = req.body;
   if (!message) { res.status(400).json({ error: 'message is required' }); return; }
 
   try {
-    const history = getOrCreateSession(sessionId);
+    const history = getOrCreateSession(sessionId, userId);
     history.push({ role: 'user', content: message });
 
     const response = await groq.chat.completions.create({
