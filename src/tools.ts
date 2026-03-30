@@ -143,7 +143,7 @@ export async function saveProperty({
 }
 
 // --- Tool 6: Get saved properties ---
-export async function getSavedProperties({ userId }: { userId: string; confirm: string }): Promise<string> {
+export async function getSavedProperties({ userId, confirm, filter }: { userId: string; confirm: string; filter?: string }): Promise<string> {
   try {
     const { getDB } = await import('./db.js');
     const db = getDB();
@@ -311,13 +311,14 @@ export const toolDefinitions = [
       name: 'getSavedProperties',
       description: 'Get all properties the user has saved.',
       parameters: {
-        type: 'object',
-        properties: {
-          userId:  { type: 'string', description: 'User identifier, use "default" if not provided' },
-          confirm: { type: 'string', description: 'Set to "yes" to confirm retrieval' },
-        },
-        required: ['userId', 'confirm']
-      }
+  type: 'object',
+  properties: {
+    userId:  { type: 'string', description: 'User identifier, use "default" if not provided' },
+    confirm: { type: 'string', description: 'Set to "yes" to confirm retrieval' },
+    filter:  { type: 'string', description: 'Optional filter, use "all" to retrieve all properties' },
+  },
+    required: ['userId', 'confirm', 'filter']
+}
     }
   },
   {
