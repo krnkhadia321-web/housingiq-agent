@@ -511,27 +511,32 @@
             if (toolUsed === 'compareCities' || toolUsed === 'compareSavedProperties') {
                 const card = document.createElement('div');
                 card.className = 'card';
+                const sym = data.currencySymbol || '$';
                 const c1 = data.city1 || { name: `${data.property1?.neighborhood}, ${data.property1?.city}`, rent: data.property1?.monthlyRent, utilities: 0, commute: 0, total: data.property1?.monthlyRent };
                 const c2 = data.city2 || { name: `${data.property2?.neighborhood}, ${data.property2?.city}`, rent: data.property2?.monthlyRent, utilities: 0, commute: 0, total: data.property2?.monthlyRent };
                 card.innerHTML = `
-        <h3>🏙️ Comparison</h3>
-        <div class="compare-grid">
-          <div class="compare-city">
-            <h4>${c1.name}</h4>
-            <div class="cost-row"><span class="label">Rent</span><span>$${c1.rent}</span></div>
-            <div class="city-total">$${c1.total}/mo</div>
-            ${data.cheaper === c1.name ? '<span class="cheaper-badge">✓ Cheaper</span>' : ''}
-          </div>
-          <div class="compare-city">
-            <h4>${c2.name}</h4>
-            <div class="cost-row"><span class="label">Rent</span><span>$${c2.rent}</span></div>
-            <div class="city-total">$${c2.total}/mo</div>
-            ${data.cheaper === c2.name ? '<span class="cheaper-badge">✓ Cheaper</span>' : ''}
-          </div>
-        </div>
-        <div class="cost-row"><span class="label">Monthly Saving</span><span>$${data.monthlySaving}</span></div>
-        <div class="cost-row"><span class="label">Annual Saving</span><span>$${data.annualSaving.toLocaleString()}</span></div>
-      `;
+    <h3>🏙️ Comparison</h3>
+    <div class="compare-grid">
+      <div class="compare-city">
+        <h4>${c1.name}</h4>
+        <div class="cost-row"><span class="label">Rent</span><span>${sym}${c1.rent.toLocaleString()}</span></div>
+        <div class="cost-row"><span class="label">Utilities</span><span>${sym}${c1.utilities.toLocaleString()}</span></div>
+        <div class="cost-row"><span class="label">Commute</span><span>${sym}${c1.commute.toLocaleString()}</span></div>
+        <div class="city-total">${sym}${c1.total.toLocaleString()}/mo</div>
+        ${data.cheaper === c1.name ? '<span class="cheaper-badge">✓ Cheaper</span>' : ''}
+      </div>
+      <div class="compare-city">
+        <h4>${c2.name}</h4>
+        <div class="cost-row"><span class="label">Rent</span><span>${sym}${c2.rent.toLocaleString()}</span></div>
+        <div class="cost-row"><span class="label">Utilities</span><span>${sym}${c2.utilities.toLocaleString()}</span></div>
+        <div class="cost-row"><span class="label">Commute</span><span>${sym}${c2.commute.toLocaleString()}</span></div>
+        <div class="city-total">${sym}${c2.total.toLocaleString()}/mo</div>
+        ${data.cheaper === c2.name ? '<span class="cheaper-badge">✓ Cheaper</span>' : ''}
+      </div>
+    </div>
+    <div class="cost-row"><span class="label">Monthly Saving</span><span>${sym}${data.monthlySaving.toLocaleString()}</span></div>
+    <div class="cost-row"><span class="label">Annual Saving</span><span>${sym}${data.annualSaving.toLocaleString()}</span></div>
+  `;
                 return card;
             }
 

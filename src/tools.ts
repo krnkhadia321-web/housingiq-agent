@@ -37,17 +37,15 @@ export function calculateTrueCost({
 
 // --- Tool 2: Compare two cities ---
 export function compareCities({
-  city1,
-  rent1,
-  utilities1,
-  commute1,
-  city2,
-  rent2,
-  utilities2,
-  commute2,
+  city1, rent1, utilities1, commute1,
+  city2, rent2, utilities2, commute2,
+  currency = 'USD',
+  currencySymbol = '$',
 }: {
   city1: string; rent1: number; utilities1: number; commute1: number;
   city2: string; rent2: number; utilities2: number; commute2: number;
+  currency?: string;
+  currencySymbol?: string;
 }) {
   const total1 = rent1 + utilities1 + commute1;
   const total2 = rent2 + utilities2 + commute2;
@@ -62,6 +60,8 @@ export function compareCities({
     monthlySaving: difference,
     annualSaving: difference * 12,
     percentageDiff,
+    currency,
+    currencySymbol,
   });
 }
 
@@ -245,26 +245,28 @@ export const toolDefinitions = [
   }
 },
   {
-    type: 'function' as const,
-    function: {
-      name: 'compareCities',
-      description: 'Compare housing costs between two cities side by side.',
-      parameters: {
-        type: 'object',
-        properties: {
-          city1:      { type: 'string', description: 'First city name' },
-          rent1:      { type: 'number', description: 'Monthly rent in city 1 in USD' },
-          utilities1: { type: 'number', description: 'Monthly utilities in city 1 in USD' },
-          commute1:   { type: 'number', description: 'Monthly commute cost in city 1 in USD' },
-          city2:      { type: 'string', description: 'Second city name' },
-          rent2:      { type: 'number', description: 'Monthly rent in city 2 in USD' },
-          utilities2: { type: 'number', description: 'Monthly utilities in city 2 in USD' },
-          commute2:   { type: 'number', description: 'Monthly commute cost in city 2 in USD' },
-        },
-        required: ['city1', 'rent1', 'utilities1', 'commute1', 'city2', 'rent2', 'utilities2', 'commute2']
-      }
+  type: 'function' as const,
+  function: {
+    name: 'compareCities',
+    description: 'Compare housing costs between two cities side by side.',
+    parameters: {
+      type: 'object',
+      properties: {
+        city1:          { type: 'string', description: 'First city name' },
+        rent1:          { type: 'number', description: 'Monthly rent in city 1' },
+        utilities1:     { type: 'number', description: 'Monthly utilities in city 1' },
+        commute1:       { type: 'number', description: 'Monthly commute cost in city 1' },
+        city2:          { type: 'string', description: 'Second city name' },
+        rent2:          { type: 'number', description: 'Monthly rent in city 2' },
+        utilities2:     { type: 'number', description: 'Monthly utilities in city 2' },
+        commute2:       { type: 'number', description: 'Monthly commute cost in city 2' },
+        currencySymbol: { type: 'string', description: 'Currency symbol e.g. $, ₹, €, £, ¥' },
+        currency:       { type: 'string', description: 'Currency code e.g. USD, INR, EUR' },
+      },
+      required: ['city1', 'rent1', 'utilities1', 'commute1', 'city2', 'rent2', 'utilities2', 'commute2', 'currencySymbol', 'currency']
     }
-  },
+  }
+},
   {
     type: 'function' as const,
     function: {
